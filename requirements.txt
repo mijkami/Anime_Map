@@ -8,6 +8,8 @@ wheel>=0.29
 numpy
 pandas
 scikit-learn
+tensorflow
+keras
 
 # tests/linter
 black
@@ -26,4 +28,33 @@ s3fs
 six>=1.14
 joblib
 memoized-property
+termcolor
+
+# vis
+graphviz
+seaborn
+matplotlib
+pydot
+
+pip>=9
+setuptools>=26
+wheel>=0.29
+pandas
+pytest
+coverage
+flake8
+black
+yapf
+python-gitlab
+twine
+six==1.15.0
+numpy==1.18.5
+pandas
+scikit-learn==0.22
+joblib
+memoized-property
+mlflow
+s3fs
+gcsfs
+google-cloud-storage
 termcolor
