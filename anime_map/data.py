@@ -2,12 +2,12 @@ import pandas as pd
 
 def get_data(name_file):
     #active_users_df_10PlusRatings_partial = pd.read_csv(f'../data/Processed_data/{name_file}.csv') # local
-    active_users_df_10PlusRatings_partial = pd.read_csv(f'anime_map_data/{name_file}.csv') #for google cloud
+    active_users_df_10PlusRatings_partial = pd.read_csv(f'gs://wagon-data-664-le_mehaute/anime_map_data/{name_file}.csv') #for google cloud
     return active_users_df_10PlusRatings_partial
 
 def get_anime():
     #anime_df_relevant_PG = pd.read_csv('../data/Processed_data/anime_df_relevant_PG.csv') # local
-    anime_df_relevant_PG = pd.read_csv('../anime_map_data/anime_df_relevant_PG.csv') # for google cloud
+    anime_df_relevant_PG = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/anime_df_relevant_PG.csv') # for google cloud
     return anime_df_relevant_PG.rename(columns={'MAL_ID' : 'anime_id'})
 
 def process_data(name_file):
