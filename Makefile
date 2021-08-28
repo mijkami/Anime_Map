@@ -58,7 +58,7 @@ pypi:
 
 # path to the file to upload to GCP (the path to the file should be absolute or should match the directory where the make command is ran)
 # replace with your local path to the `train_1k.csv` and make sure to put the path between quotes
-LOCAL_PATH="/home/tanguy_lm06/code/mijkami/anime_map/data/raw_data/animelist.csv"
+LOCAL_PATH="/home/tanguy_lm06/code/mijkami/anime_map/data/Processed_data/active_users_df_10PlusRatings_partial.csv"
 
 # bucket directory in which to store the uploaded file (`data` is an arbitrary name that we choose to use)
 BUCKET_FOLDER=anime_map_data
@@ -69,3 +69,25 @@ BUCKET_FILE_NAME=$(shell basename ${LOCAL_PATH})
 upload_data:
     # @gsutil cp train_1k.csv gs://wagon-ml-my-bucket-name/data/train_1k.csv
 	@gsutil cp ${LOCAL_PATH} gs://${BUCKET_NAME}/${BUCKET_FOLDER}/${BUCKET_FILE_NAME}
+
+
+JOB_NAME=anime_map_knn_test_$(shell date +'%Y%m%d_%H%M%S')
+BUCKET_TRAINING_FOLDER=anime_map_training
+PACKAGE_NAME=anime_map
+FILENAME=trainer
+
+REGION=europe-west1
+
+PYTHON_VERSION=3.7
+FRAMEWORK=scikit-learn
+RUNTIME_VERSION=1.15
+
+gcp_submit_training:
+	gcloud ai-platform jobs submit training ${JOB_NAME} \
+		--job-dir gs://${BUCKET_NAME}/${BUCKET_TRAINING_FOLDER} \
+		--package-path ${PACKAGE_NAME} \
+		--module-name ${PACKAGE_NAME}.${FILENAME} \
+		--python-version=${PYTHON_VERSION} \
+		--runtime-version=${RUNTIME_VERSION} \
+		--region ${REGION} \
+		--stream-logs
