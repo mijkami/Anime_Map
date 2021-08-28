@@ -1,5 +1,5 @@
-from data import process_data
-from pipeline import model_knn_anime_map
+from anime_map.data import process_data
+from anime_map.pipeline import model_knn_anime_map
 
 name_file = 'active_users_df_10PlusRatings_partial'
 

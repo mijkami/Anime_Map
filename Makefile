@@ -72,7 +72,7 @@ upload_data:
 
 
 JOB_NAME=anime_map_knn_test_$(shell date +'%Y%m%d_%H%M%S')
-BUCKET_TRAINING_FOLDER=anime_map_training
+BUCKET_TRAINING_FOLDER=anime_map_data
 PACKAGE_NAME=anime_map
 FILENAME=trainer
 
