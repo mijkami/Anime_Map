@@ -1,9 +1,8 @@
 import pandas as pd
-import joblib
 from google.cloud import storage
 
 name_file = "rating_complete"
-minimun_of_rating = 100
+minimun_of_rating = 10
 new_df = f'{name_file}_{minimun_of_rating}plus_PG'
 BUCKET_NAME = 'wagon-data-664-le_mehaute'
 STORAGE_LOCATION = f'anime_map_data/{new_df}.csv'
@@ -52,6 +51,15 @@ def create_data(name_file):
     
     return active_users_df
 
+
+def modif_data(name_file):
+    df = get_data(name_file)
+    print(df.columns)
+    df['rating'] = 1
+    df.rename(columns={'rating' : 'complete'}, inplace =True)
+    
+    return df
+    
 def upload_model_to_gcp():
 
     client = storage.Client()
@@ -79,7 +87,7 @@ def save_data(reg):
 
 
 if __name__ == '__main__':
-    active_users_df = create_data(name_file)
+    active_users_df = modif_data(new_df)
     print(active_users_df.shape)
     save_data(active_users_df)
     print('finish')
