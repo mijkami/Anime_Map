@@ -11,6 +11,7 @@ from tensorflow.keras.layers import Embedding, Flatten, Input, Dropout, Dense
 from tensorflow.keras.optimizers import Adam
 #from tensorflow.keras.utils import model_to_dot
 from keras.layers import dot
+from tensorflow.keras.utils import plot_model
 from tensorflow import keras
 import pandas as pd
 import numpy as np
@@ -20,6 +21,7 @@ from sklearn.model_selection import train_test_split
 #from keras.utils.np_utils import to_categorical
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error
+#from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 
 ### GCP configuration - - - - - - - - - - - - - - - - - - -
 
@@ -117,33 +119,46 @@ def train_model(train,user_input, anime_input,prod):
     fc_2_dropout = Dropout(0.2, name='fc-2-dropout')(fc_2)
     fc_3 = Dense(1, name='fc-3', activation='relu')(fc_2_dropout)
     model = Model([user_input, anime_input], fc_3)
-    model.compile(optimizer=Adam(lr=0.1), loss = 'mean_squared_error')
-    model.fit([train.user_id, train.anime_id], train.rating, epochs=5)
+    model.compile(optimizer=Adam(learning_rate=0.1), loss = 'mean_squared_error')
+    model.fit([train.user_id, train.anime_id], train.rating, epochs=10,verbose=0)
     print("trained model")
     return model
 
-STORAGE_LOCATION = 'models/NeuMF/model_NeuMF.joblib'
+STORAGE_LOCATION = 'models/anime_map/neuMFmodel'
+
+# def save_model(model):
+#     """method that saves the model into a .joblib file and uploads it on Google Storage /models folder
+#     HINTS : use joblib library and google-cloud-storage"""
+
+#     # saving the trained model to disk is mandatory to then beeing able to upload it to storage
+#     # Implement here
+#     joblib.dump(model, 'neuMFmodel.joblib')
+#     #joblib.dump(model, 'neuMFmodel.pkl')
+#     print("saved neuMFmodel.joblib locally")
+
+#     # Implement here
+#     upload_model_to_gcp()
+#     print(f"uploaded model.joblib to gcp cloud storage under \n => {STORAGE_LOCATION}")
+
+def save_model_backup(model):
+    tf.keras.models.save_model(model, 'neuMFmodel.h5')
+    print("saved model NOT joblib locally")
+    upload_model_to_gcp()
+    print(f"uploaded neuMFmodel.h5 to gcp cloud storage under \n => {STORAGE_LOCATION}")
+
+# def save_model_h5(model):
+#     model.save('model.h5')  # creates a HDF5 file 'my_model.h5'
+#     #     print("saved model.h5 locally")
+
+
+#joblib.dump('filename.pkl')
 
 
 def upload_model_to_gcp():
     client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
     blob = bucket.blob(STORAGE_LOCATION)
-    blob.upload_from_filename('model_NeuMF.joblib')
-
-
-def save_model(model):
-    """method that saves the model into a .joblib file and uploads it on Google Storage /models folder
-    HINTS : use joblib library and google-cloud-storage"""
-
-    # saving the trained model to disk is mandatory to then beeing able to upload it to storage
-    # Implement here
-    joblib.dump(model, 'model_NeuMF.joblib')
-    print("saved model.joblib locally")
-
-    # Implement here
-    upload_model_to_gcp()
-    print(f"uploaded model.joblib to gcp cloud storage under \n => {STORAGE_LOCATION}")
+    blob.upload_from_filename('neuMFmodel.h5')
 
 
 if __name__ == '__main__':
@@ -160,4 +175,6 @@ if __name__ == '__main__':
     # this package is uploaded to GCP before being executed)
     model = train_model(train, user_input, anime_input,prod)
     # save trained model to GCP bucket (whether the training occured locally or on GCP)
-    save_model(model)
+    save_model_backup(model)
+    #save_model(model)
+    #save_model_h5(model)
