@@ -1,10 +1,10 @@
 from google.cloud import storage
-from anime_map.data import process_data
-from anime_map.pipeline import model_knn_anime_map
+from anime_map.data import get_data
+from anime_map.pipeline import model_knn_anime_map, vectorisation_data
 import joblib
+from anime_map.name import *
 
-BUCKET_NAME = 'wagon-data-664-le_mehaute'
-name_file = 'active_users_df_10PlusRatings_partial'
+
 
 class Trainer:
     def __init__(self, pca_pivot):
@@ -14,7 +14,6 @@ class Trainer:
         return model_knn_anime_map(self.pca_pivot)
 
 
-STORAGE_LOCATION = 'models/anime_map/knn_model.joblib'
 
 
 def upload_model_to_gcp():
@@ -45,8 +44,10 @@ def save_model(reg):
 
 
 if __name__ == '__main__':
-    pivot_df, anime_name_pivot_df = process_data(name_file)
-    print('process_data step ok')
+    df = get_data()
+    df = normalisation_data(df)
+    pivot_df, anime_name_pivot_df = vectorisation_data(df)
+    print('vectorisation_data step ok')
     model = Trainer(pivot_df)
     print('Trainer step ok')
     model_knn = model.train()
