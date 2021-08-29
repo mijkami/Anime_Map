@@ -1,13 +1,14 @@
 import pandas as pd
+import joblib
 
 def get_data(name_file):
-    #active_users_df_10PlusRatings_partial = pd.read_csv(f'../data/Processed_data/{name_file}.csv') # local
-    active_users_df_10PlusRatings_partial = pd.read_csv(f'gs://wagon-data-664-le_mehaute/anime_map_data/{name_file}.csv') #for google cloud
+    active_users_df_10PlusRatings_partial = pd.read_csv(f'../data/Processed_data/{name_file}.csv') # local
+    #active_users_df_10PlusRatings_partial = pd.read_csv(f'gs://wagon-data-664-le_mehaute/anime_map_data/{name_file}.csv') #for google cloud
     return active_users_df_10PlusRatings_partial
 
 def get_anime():
-    #anime_df_relevant_PG = pd.read_csv('../data/Processed_data/anime_df_relevant_PG.csv') # local
-    anime_df_relevant_PG = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/anime_df_relevant_PG.csv') # for google cloud
+    anime_df_relevant_PG = pd.read_csv('../data/Processed_data/anime_df_relevant_PG.csv') # local
+    #anime_df_relevant_PG = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/anime_df_relevant_PG.csv') # for google cloud
     return anime_df_relevant_PG.rename(columns={'MAL_ID' : 'anime_id'})
 
 def process_data(name_file):
@@ -29,3 +30,14 @@ def process_data(name_file):
     anime_name_pivot_df = anime_name_pivot_df.reset_index().drop(columns = 'index')
     
     return pivot_df, anime_name_pivot_df
+
+
+
+
+if __name__ == '__main__':
+    name_file = "active_users_df_10PlusRatings_partial"
+    pivot_df, anime_name_pivot_df = process_data(name_file)
+    print('start')
+    joblib.dump(pivot_df, '../data/pivot_df.joblib')
+    joblib.dump(anime_name_pivot_df, '../data/anime_name_pivot_df.joblib')
+    print('finish')
