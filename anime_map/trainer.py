@@ -53,3 +53,4 @@ if __name__ == '__main__':
     print('model.train() step ok')
     save_model(model_knn)
     print('save_model ok')
+    print(sklearn.__version__)
