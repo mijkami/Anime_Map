@@ -3,6 +3,7 @@ from sklearn.decomposition import PCA
 from anime_map.data import get_anime
 from google.cloud import storage
 import pandas as pd
+import numpy as np
 
 name_file = "rating_complete"
 minimun_of_rating = 10
@@ -12,8 +13,9 @@ BUCKET_NAME = 'wagon-data-664-le_mehaute'
 def normalisation_data(df):
     # uniquely for the animelist_10plus and animelist_100plus
     df['rating'] = df['rating']/10
-    return data_users_df
+    return df
 
+'''
 def vectorisation_data(df):
 
     anime_df_relevant_PG = get_anime()
@@ -24,7 +26,7 @@ def vectorisation_data(df):
     print('anime_Genres_df_encoded ok')
     
     print(f'df_shape : {df.shape}')
-    df_ = df.iloc[0:5*10**6,:]
+    df_ = df.iloc[0:25*10**6,:]
     if 'rating' in df.columns:
         pivot_df = df_.pivot_table(index='anime_id',columns='user_id',values='rating').fillna(0)
     else:
@@ -38,6 +40,22 @@ def vectorisation_data(df):
     anime_name_pivot_df = anime_name_pivot_df.reset_index().sort_values('anime_id')
     
     return pivot_df, anime_name_pivot_df
+'''
+
+def pivot_matrix(df):
+    np_df = df.to_numpy()
+    print('starting pivot with numpy')
+    cols, col_pos = np.unique(np_df[:, 0], return_inverse=True)
+    rows, row_pos = np.unique(np_df[:, 1], return_inverse=True)
+
+    print('create cols and rows')
+    
+    pivot_table = np.zeros((len(rows), len(cols)), dtype=np_df.dtype)
+    print('pivot_table full of zeros')
+    pivot_table[row_pos, col_pos] = np_df[:, 2]
+    print('pivot_table completed')
+    
+    return pivot_table
 
 def PCA_vector(pivot_df):
     pca = PCA(n_components = 0.9, svd_solver='full')
@@ -78,13 +96,13 @@ def save_vector(reg,new_df):
 
 
 if __name__ == '__main__':
+    print('start')
     df = pd.read_csv(f'gs://wagon-data-664-le_mehaute/anime_map_data/{df_to_vect}.csv')
     print('read_csv ok')
-    pivot_df, anime_name_pivot_df = vectorisation_data(df)
+    pivot_df = pivot_matrix(df)
     print(f'pivot_df_shape : {pivot_df.shape}')
-    print(f'anime_name_pivot_df_shape : {anime_name_pivot_df.shape}')
-    save_vector(anime_name_pivot_df, 'anime_name_pivot_df')
+    save_vector(pivot_df, f'{df_to_vect}_pivot_df')
     pca_vector = PCA_vector(pivot_df)
     print(f'pca_vector_shape : {pca_vector.shape}')
-    save_vector(pca_vector, 'pca_vector')
+    save_vector(pca_vector,  f'{df_to_vect}_pca_vector')
     print('finish')
