@@ -7,6 +7,7 @@ from trying_NeuMF.trainer import get_data, id_transform, len_to_num, split
 from google.cloud import storage
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import tensorflow as tf
+import pickle
 PATH_TO_LOCAL_MODEL = 'model.joblib'
 
 BUCKET_NAME = 'wagon-data-664-gogunska-anime_map'
@@ -22,9 +23,10 @@ def get_test():
     return test
 
 def load_model():
-    model = tf.keras.models.load_model('neuMFmodel.h5')
-    #model = joblib.load('neuMFmodel.joblib')
+    #model = tf.keras.models.load_model('neuMFmodel.h5')
+    model = pickle.load(open('NeuMF_MLperceptron_full_data', 'rb'))
     return model
+
 
 def predict(test,model):
     y_pred = np.round(model.predict([test.user_id, test.anime_id]), decimals=2)
