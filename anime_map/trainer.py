@@ -6,7 +6,7 @@ import joblib
 import pandas as pd
 
 name = "rating_complete"
-minimun_of_rating = 100
+minimun_of_rating = 10
 name_file = f'{name}_{minimun_of_rating}plus_PG'
 BUCKET_NAME = 'wagon-data-664-le_mehaute'
 STORAGE_LOCATION = f'anime_map_data/{name_file}_knn_model.joblib'  #for data.py .csv  and for trainer.py .joblib
@@ -34,7 +34,7 @@ def pivot_matrix(df):
     #just gor anime_id in this df
     anime_genre_df = anime_genre_df.merge(anime_id_df, on='anime_id',how='inner')
     #one hot encod genres for anime_genre_df
-    anime_genres_df_encoded = pd.concat(objs = [anime_genre_df.drop(columns = 'Genres', axis =1), name['Genres'].str.get_dummies(sep=", ")], axis = 1)
+    anime_genres_df_encoded = pd.concat(objs = [anime_genre_df.drop(columns = 'Genres', axis =1), anime_genre_df['Genres'].str.get_dummies(sep=", ")], axis = 1)
     anime_genres_df_encoded = anime_genres_df_encoded.set_index('anime_id')
     #convert to numpy array
     anime_genres_np = anime_genres_df_encoded.to_numpy()
@@ -103,11 +103,12 @@ if __name__ == '__main__':
     print(f'anime_name_df shape {df.shape}')
     df, anime_id_df = pivot_matrix(df)
     save_vector(anime_id_df,f'{name_file}_anime_id_df')
-    print('pivot_matrix step ok')
+    print(f'anime_id_df shape {anime_id_df.shape}')
     print(f'pivot_matrix shape {df.shape}')
     print(df)
     df =  PCA_vector(df)
-    save_vector(df,f'{name_file}_pivot_pca_df')
+    save_vector(df,f'{name_file}_PCA_vector_df')
+    print(f'PCA_vector shape {df.shape}')
     model = Trainer(df)
     print('Trainer step ok')
     model_knn = model.train()
