@@ -64,6 +64,28 @@ MODEL_VERSION = 'v1'
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+# Optimize memory for lighter dataset
+def df_optimized(df, verbose=True, **kwargs):
+    """
+    Reduces size of dataframe by downcasting numerical columns
+    :param df: input dataframe
+    :param verbose: print size reduction if set to True
+    :param kwargs:
+    :return:
+    """
+    in_size = df.memory_usage(index=True).sum()
+    for type in ["float", "integer"]:
+        l_cols = list(df.select_dtypes(include=type))
+        for col in l_cols:
+            df[col] = pd.to_numeric(df[col], downcast=type)
+            if type == "float":
+                df[col] = pd.to_numeric(df[col], downcast="integer")
+    out_size = df.memory_usage(index=True).sum()
+    ratio = (1 - round(out_size / in_size, 2)) * 100
+    GB = out_size / 1000000000
+    if verbose:
+        print("optimized size by {} % | {} GB".format(ratio, GB))
+    return df
 
 
 def get_data():
@@ -72,6 +94,10 @@ def get_data():
     df = pd.read_csv(f"gs://{BUCKET_NAME}/{BUCKET_TRAIN_DATA_PATH}")
     #to run locally - faster
     #df = pd.read_csv("data/processed_data/active_users_df.csv", nrows=5000000)
+    norm_rating = df.rating/10
+    df['rating'] = norm_rating
+    df_optimized(df)
+    print('optimized mem')
     return df
 
 
@@ -147,34 +173,40 @@ def train_model(num_users,num_animes,train):
     # Final prediction
     result = Dense(1, name='result', activation='relu')(combine_mlp_mf)
     model = Model([user_input, anime_input], result)
-    es = EarlyStopping(patience=3, restore_best_weights=True)
-    model.compile(Adam(learning_rate=0.01), loss='mean_absolute_error', metrics='mse')
+    #es = EarlyStopping(patience=10, restore_best_weights=True)
+    es = EarlyStopping()
+    model.compile(Adam(learning_rate=0.1), loss='mse', metrics='mse')
     model.fit([train.user_id, train.anime_id],
               train.rating,
-              epochs=3,
+              epochs=1,
               validation_split=0.3,
+              verbose=0,
               callbacks=[es])
     print("trained model")
     return model
 
 
-STORAGE_LOCATION = 'models/anime_map/NeuMF_MLperceptron_full_data'
+STORAGE_LOCATION = 'models/anime_map/NeuMF_MLperceptron_full_data_1batch'
 
 
 def save_model(model):
-    #tf.keras.models.save_model(model, 'NeuMF_MLperceptron_full_data.h5')
-    pickle.dump(model, open('NeuMF_MLperceptron_full_data', 'wb'))
-    print("saved model NeuMF_MLperceptron_full_data.h5 locally")
+    # #tf.keras.models.save_model(model, 'NeuMF_MLperceptron_full_data.h5')
+    # pickle.dump(model, open('NeuMF_MLperceptron_full_data', 'wb'))
+    # print("saved model NeuMF_MLperceptron_full_data_1batch.pickle locally")
+    # upload_model_to_gcp()
+    # print(
+    #     f"uploaded NeuMF_MLperceptron_full_data_1batch to gcp cloud storage under \n => {STORAGE_LOCATION}"
+    # )
+    tf.keras.models.save_model(model, 'NeuMF_MLperceptron_full_data_1batch.h5')
+    print("saved model NOT joblib locally")
     upload_model_to_gcp()
-    print(
-        f"uploaded NeuMF_MLperceptron_full_data to gcp cloud storage under \n => {STORAGE_LOCATION}"
-    )
+    print(f"uploaded neuMFmodel.h5 to gcp cloud storage under \n => {STORAGE_LOCATION}")
 
 def upload_model_to_gcp():
     client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
     blob = bucket.blob(STORAGE_LOCATION)
-    blob.upload_from_filename('NeuMF_MLperceptron_full_data')
+    blob.upload_from_filename('NeuMF_MLperceptron_full_data_1batch.h5')
 
 
 if __name__ == '__main__':
