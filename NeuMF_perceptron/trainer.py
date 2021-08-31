@@ -24,6 +24,8 @@ from sklearn.metrics import mean_absolute_error
 #from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras.layers import BatchNormalization
 import pickle
+from tensorflow.keras.callbacks import EarlyStopping
+
 
 ### GCP configuration - - - - - - - - - - - - - - - - - - -
 
@@ -145,8 +147,13 @@ def train_model(num_users,num_animes,train):
     # Final prediction
     result = Dense(1, name='result', activation='relu')(combine_mlp_mf)
     model = Model([user_input, anime_input], result)
-    model.compile(Adam(learning_rate=0.01), loss='mean_absolute_error')
-    model.fit([train.user_id, train.anime_id], train.rating, epochs=3)
+    es = EarlyStopping(patience=3, restore_best_weights=True)
+    model.compile(Adam(learning_rate=0.01), loss='mean_absolute_error', metrics='mse')
+    model.fit([train.user_id, train.anime_id],
+              train.rating,
+              epochs=3,
+              validation_split=0.3,
+              callbacks=[es])
     print("trained model")
     return model
 
