@@ -60,7 +60,7 @@ pypi:
 PROJECT_ID=argon-depot-318913
 
 # bucket name - replace with your GCP bucket name
-BUCKET_NAME=wagon-data-664-gogunska-anime_map
+BUCKET_NAME=wagon-data-664-gogunska-neumf-perceptron
 
 # choose your region from https://cloud.google.com/storage/docs/locations#available_locations
 REGION=europe-west1
@@ -70,7 +70,7 @@ BUCKET_TRAINING_FOLDER = 'trainings'
 
 ##### Package params  - - - - - - - - - - - - - - - - - - -
 
-PACKAGE_NAME= trying_NeuMF
+PACKAGE_NAME= NeuMF_perceptron
 FILENAME=trainer
 PYTHON_VERSION=3.7
 FRAMEWORK=scikit-learn
@@ -78,7 +78,7 @@ RUNTIME_VERSION=1.15
 
 ##### Job - - - - - - - - - - - - - - - - - - - - - - - - -
 
-JOB_NAME=neuMF_training_pipeline_$(shell date +'%Y%m%d_%H%M%S')
+JOB_NAME=neuMF_perceptron_training_$(shell date +'%Y%m%d_%H%M%S')
 
 
 set_project:
@@ -98,7 +98,7 @@ BUCKET_FOLDER=data
 BUCKET_FILE_NAME=$(shell basename ${LOCAL_PATH})
 
 upload_data:
-	# @gsutil cp train_1k.csv gs://wagon-ml-my-bucket-name/data/active_users_df.csv
+	# @gsutil cp data/processed_data/active_users_df.csv gs://wagon-ml-my-bucket-name/data/active_users_df.csv
 	@gsutil cp ${LOCAL_PATH} gs://${BUCKET_NAME}/${BUCKET_FOLDER}/${BUCKET_FILE_NAME}
 
 
