@@ -5,6 +5,8 @@
 raw_data/
 data/
 processed_data/
+models_anime_map_knn_model.joblib
+model_knn.sav
 *.csv
 **/__pycache__/
 .env
