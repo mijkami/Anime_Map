@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error
 #from tensorflow.python.keras.saving.hdf5_format import save_model_to_hdf5
 from keras.layers import BatchNormalization
-
+import pickle
 
 ### GCP configuration - - - - - - - - - - - - - - - - - - -
 
@@ -51,7 +51,7 @@ BUCKET_TRAIN_DATA_PATH = 'data/active_users_df.csv'
 ##### Model - - - - - - - - - - - - - - - - - - - - - - - -
 
 # model folder name (will contain the folders for all trained model versions)
-MODEL_NAME = 'NeuMF_MLperceptron'
+MODEL_NAME = 'NeuMF_MLperceptron_full_data'
 
 # model version folder name (where the trained model.joblib file will be stored)
 MODEL_VERSION = 'v1'
@@ -67,9 +67,9 @@ MODEL_VERSION = 'v1'
 def get_data():
     """method to get the training data (or a portion of it) from google cloud bucket"""
     #to run in cloud
-    #df = pd.read_csv(f"gs://{BUCKET_NAME}/{BUCKET_TRAIN_DATA_PATH}", nrows=5000000)
+    df = pd.read_csv(f"gs://{BUCKET_NAME}/{BUCKET_TRAIN_DATA_PATH}")
     #to run locally - faster
-    df = pd.read_csv("data/processed_data/active_users_df.csv", nrows=5000000)
+    #df = pd.read_csv("data/processed_data/active_users_df.csv", nrows=5000000)
     return df
 
 
@@ -150,22 +150,24 @@ def train_model(num_users,num_animes,train):
     print("trained model")
     return model
 
-STORAGE_LOCATION = 'models/anime_map/neuMFPerceptronmodel'
+
+STORAGE_LOCATION = 'models/anime_map/NeuMF_MLperceptron_full_data'
 
 
 def save_model(model):
-    tf.keras.models.save_model(model, 'neuMFPerceptronmodel.h5')
-    print("saved model neuMFPerceptronmodel.h5 locally")
+    #tf.keras.models.save_model(model, 'NeuMF_MLperceptron_full_data.h5')
+    pickle.dump(model, open('NeuMF_MLperceptron_full_data', 'wb'))
+    print("saved model NeuMF_MLperceptron_full_data.h5 locally")
     upload_model_to_gcp()
     print(
-        f"uploaded neuMFPerceptronmodel.h5 to gcp cloud storage under \n => {STORAGE_LOCATION}"
+        f"uploaded NeuMF_MLperceptron_full_data to gcp cloud storage under \n => {STORAGE_LOCATION}"
     )
 
 def upload_model_to_gcp():
     client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
     blob = bucket.blob(STORAGE_LOCATION)
-    blob.upload_from_filename('neuMFPerceptronmodel.h5')
+    blob.upload_from_filename('NeuMF_MLperceptron_full_data')
 
 
 if __name__ == '__main__':
