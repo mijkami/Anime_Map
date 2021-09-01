@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import joblib
-
+from google.cloud import storage
 
 # take list users with more than 100 completed anime
 users_list_test = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/rating_complete_100plus_PG.csv', nrows = 2000000)[['user_id']].drop_duplicates()
@@ -25,10 +25,25 @@ anime_id_rating_complete_100plus = pd.read_csv('gs://wagon-data-664-le_mehaute/a
 anime_id_rating_complete_100plus = anime_id_rating_complete_100plus.merge(animelist_relevant, on = 'anime_id', how='inner')
 
 # import the models and their pivot
-model_rating_complete_100plus = joblib.load('gs://wagon-data-664-le_mehaute/anime_map_data/rating_complete_100plus_PG_knn_model.joblib')
+storage_client = storage.Client()
+bucket_name = 'wagon-data-664-le_mehaute/anime_map_data'
+model_bucket='rating_complete_100plus_PG_knn_model.joblib'
+model_local='local.joblib'
+
+bucket = storage_client.get_bucket(bucket_name)
+blob = bucket.blob(model_bucket)
+blob.download_to_filename(model_local)
+model_rating_complete_100plus = joblib.load(model_local)
+#model_rating_complete_100plus = joblib.load('gs://wagon-data-664-le_mehaute/anime_map_data/rating_complete_100plus_PG_knn_model.joblib')
 pivot_rating_complete_100plus = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/rating_complete_100plus_PG_PCA_vector_df.csv')
 
-model_animelist_100plus = joblib.load('gs://wagon-data-664-le_mehaute/anime_map_data/animelist_100plus_PG_knn_model.joblib')
+model_bucket = 'animelist_100plus_PG_knn_model.joblib'
+bucket = storage_client.get_bucket(bucket_name)
+blob = bucket.blob(model_bucket)
+blob.download_to_filename(model_local)
+model_animelist_100plus = joblib.load(model_local)
+
+#model_animelist_100plus = joblib.load('gs://wagon-data-664-le_mehaute/anime_map_data/animelist_100plus_PG_knn_model.joblib')
 pivot_animelist_100plus = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/animelist_100plus_PG_PCA_vector_df.csv')
 
 
