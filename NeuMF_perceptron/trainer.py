@@ -4,7 +4,7 @@ from sklearn import linear_model
 import numpy as np
 import joblib
 import matplotlib.pyplot as plt
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error,mean_squared_error
 import tensorflow as tf
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Embedding, Flatten, concatenate, Input, Dropout, Dense
@@ -86,6 +86,20 @@ def df_optimized(df, verbose=True, **kwargs):
     if verbose:
         print("optimized size by {} % | {} GB".format(ratio, GB))
     return df
+
+def baseline(df):
+    df.rating.mean()
+    y_base = df.rating.mean()
+    df['mean_pred'] = df['rating']
+    df['mean_pred'] = y_base
+    y_true = df.rating
+    y_true.shape
+    y_mean_pred = df.mean_pred
+    mae = mean_absolute_error(y_true, y_mean_pred)
+    mse = mean_squared_error(y_true, y_mean_pred)
+    print(f"BASELINE: mae = {mae}, mse = {mse}")
+    return mae,mse
+
 
 
 def get_data():
@@ -235,5 +249,7 @@ if __name__ == '__main__':
     # split
     train, test = split(dataset)
     # train model
+    #baseline scores
+    baseline(dataset)
     model = train_model(num_users, num_animes, train)
     save_model(model)
