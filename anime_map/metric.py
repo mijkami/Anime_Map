@@ -94,13 +94,13 @@ def metric_model_anime(user_id = 33, model = 'notation', nb_recomendation = 5, b
             # call the models for the different user_best_anime
             for anime_name in list_anime:
                 list_reco_vote.append(recomendation_animelist_100plus_pca(anime_name, nb_recomendation)) 
-                anime_id_model = anime_id_animelist_100plus
+
         elif model == 'completed':
             list_reco_vote = []
             # call the models for the different user_best_anime
             for anime_name in list_anime:
                 list_reco_vote.append(recomendation_rating_complete_100plus_pca(anime_name, nb_recomendation))
-                anime_id_model = anime_id_rating_complete_100plus
+
         else:
             print('bye')
             
@@ -146,11 +146,11 @@ def metric_model_anime(user_id = 33, model = 'notation', nb_recomendation = 5, b
         print(f'{100 * np.mean(verif_score_list)/np.mean(max_score_list)}%')
 
 if __name__ == '__main__':
-    sample = users_list_rating_test.sample(n=25)
+    sample = users_list_rating_test.sample(n=5)
     print(f'sample shape : {sample.shape}')
     for id in sample.user_id.tolist():
         print(f'for user id : {id}')
         print(f'notation')
-        metric_model_anime(user_id=id,best_anime=10)
+        metric_model_anime(user_id=id,best_anime=5)
         print(f'completed')
         metric_model_anime(user_id=id,model = 'completed',best_anime=10)
