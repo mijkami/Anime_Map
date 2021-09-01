@@ -4,9 +4,9 @@ import joblib
 from google.cloud import storage
 
 # take list users with more than 100 completed anime
-users_list_test = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/rating_complete_100plus_PG.csv', nrows = 2000000)[['user_id']].drop_duplicates()
+users_list_test = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/rating_complete_100plus_PG.csv')[['user_id']].drop_duplicates()
 # take list users with more than 100 rated anime
-users_list_rating = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/animelist_100plus_PG.csv', nrows = 2000000)
+users_list_rating = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/animelist_100plus_PG.csv')
 
 # make list users with more than 100 rated anime and 100 completed anime where we will select users
 # to feed metric_model_anime. likes we are sure the users will work on the two model of recommendation
@@ -26,8 +26,8 @@ anime_id_rating_complete_100plus = anime_id_rating_complete_100plus.merge(animel
 
 # import the models and their pivot
 storage_client = storage.Client()
-bucket_name = 'wagon-data-664-le_mehaute/anime_map_data'
-model_bucket='rating_complete_100plus_PG_knn_model.joblib'
+bucket_name = 'wagon-data-664-le_mehaute'
+model_bucket='anime_map_data/rating_complete_100plus_PG_knn_model.joblib'
 model_local='local.joblib'
 
 bucket = storage_client.get_bucket(bucket_name)
@@ -37,7 +37,8 @@ model_rating_complete_100plus = joblib.load(model_local)
 #model_rating_complete_100plus = joblib.load('gs://wagon-data-664-le_mehaute/anime_map_data/rating_complete_100plus_PG_knn_model.joblib')
 pivot_rating_complete_100plus = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/rating_complete_100plus_PG_PCA_vector_df.csv')
 
-model_bucket = 'animelist_100plus_PG_knn_model.joblib'
+model_bucket = 'anime_map_data/animelist_100plus_PG_knn_model.joblib'
+
 bucket = storage_client.get_bucket(bucket_name)
 blob = bucket.blob(model_bucket)
 blob.download_to_filename(model_local)
@@ -57,13 +58,7 @@ def recomendation_rating_complete_100plus_pca(anime_name, nb_recomendation = 10)
             prediction.append([pivot_rating_complete_100plus.index[indices.flatten()[i]],0])
         else:
             prediction.append([pivot_rating_complete_100plus.index[indices.flatten()[i]],distances.flatten()[i]])
-    results = []
-    for i in range(len(prediction)):
-        anime_name = anime_id_rating_complete_100plus.iloc[prediction[i][0]].Name
-        distance = prediction[i][1]
-        results.append([anime_name,distance])
-    return results
-
+    return prediction
 
 def recomendation_animelist_100plus_pca(anime_name, nb_recomendation = 10):
     index_nb = anime_id_animelist_100plus.index[anime_id_animelist_100plus['Name'] == anime_name].tolist()[0]
@@ -75,20 +70,15 @@ def recomendation_animelist_100plus_pca(anime_name, nb_recomendation = 10):
             prediction.append([pivot_animelist_100plus.index[indices.flatten()[i]],0])
         else:
             prediction.append([pivot_animelist_100plus.index[indices.flatten()[i]],distances.flatten()[i]])
-    results = []
-    for i in range(len(prediction)):
-        anime_name = anime_id_animelist_100plus.iloc[prediction[i][0]].Name
-        distance = prediction[i][1]
-        results.append([anime_name,distance])
-    return results
-
-
+    return prediction
 
 def metric_model_anime(user_id = 33, model = 'notation', nb_recomendation = 5, best_anime=3):
     user = users_list_rating_name_test.query(f'user_id == {user_id}')[['anime_id','rating','Name']].sort_values(by=['rating'], ascending=False)
     user_best_anime = user.iloc[0:best_anime]
     # means notation on user
-    means_note = np.mean([i for i in users_list_rating_name_test.query(f'user_id=={user_id}').rating.tolist() if i!=0])
+    list_notation = [i for i in users_list_rating_name_test.query(f'user_id=={user_id}').rating.tolist() if i!=0]
+    means_note = np.mean(list_notation)
+    user_best_anime = user_best_anime[user_best_anime['rating'] >means_note]
     print(f'means_note : {means_note}')
     
     # init the value of the metric
@@ -125,9 +115,8 @@ def metric_model_anime(user_id = 33, model = 'notation', nb_recomendation = 5, b
         # loop on the predict for one anime
         for j in range((len(list_reco_vote[i][1:]))):
         
-            name = list_reco_vote[i][j+1][0]
-            anime_id = anime_id_model.query(f'Name == "{name}"').anime_id.tolist()[0]
-            rating = users_list_rating_name_test.query(f'anime_id=={anime_id}').query('user_id==6').rating.tolist()
+            anime_id = list_reco_vote[i][j+1][0]
+            rating = users_list_rating_name_test.query(f'anime_id=={anime_id}').query(f'user_id=={user_id}').rating.tolist()
             # test if a rating exist for the anime recommended
             if  rating != []:
                 # take the rating for comparaison
@@ -139,7 +128,7 @@ def metric_model_anime(user_id = 33, model = 'notation', nb_recomendation = 5, b
                 # if note == zero => no vote from users so max_score-1
                 elif note == 0:
                     max_score -=1
-                print(note)
+                #print(note)
             # if rating == [] users did not see the anime so max_score-1
             elif rating == []:
                 max_score -=1
@@ -147,15 +136,21 @@ def metric_model_anime(user_id = 33, model = 'notation', nb_recomendation = 5, b
             max_score_list.append(max_score)
             verif_score_list.append(verif_score)
             efficiancy = 100 * verif_score/max_score
-            print(f'efficiancy partial = {efficiancy}%')
+            #print(f'efficiancy partial = {efficiancy}%')
             metric.append(efficiancy)
         else:
-            print('nothing')
-    print(f'efficiancy : {np.mean(metric)}')
+            #print('nothing')
+            pass
+    print(f'efficiancy : {np.mean(metric)}%')
     if np.mean(max_score_list)!= 0:
         print(f'{100 * np.mean(verif_score_list)/np.mean(max_score_list)}%')
-        
-
 
 if __name__ == '__main__':
-    metric_model_anime()
+    sample = users_list_rating_test.sample(n=25)
+    print(f'sample shape : {sample.shape}')
+    for id in sample.user_id.tolist():
+        print(f'for user id : {id}')
+        print(f'notation')
+        metric_model_anime(user_id=id,best_anime=10)
+        print(f'completed')
+        metric_model_anime(user_id=id,model = 'completed',best_anime=10)
