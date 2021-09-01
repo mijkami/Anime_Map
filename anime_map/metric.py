@@ -141,16 +141,43 @@ def metric_model_anime(user_id = 33, model = 'notation', nb_recomendation = 5, b
         else:
             #print('nothing')
             pass
-    print(f'efficiancy : {np.mean(metric)}%')
-    if np.mean(max_score_list)!= 0:
-        print(f'{100 * np.mean(verif_score_list)/np.mean(max_score_list)}%')
+    #print(f'efficiancy : {np.mean(metric)}%')
+    #if np.mean(max_score_list)!= 0:
+        #print(f'{100 * np.mean(verif_score_list)/np.mean(max_score_list)}%')
+    return verif_score_list, max_score_list
 
 if __name__ == '__main__':
-    sample = users_list_rating_test.sample(n=5)
+    sample = users_list_rating_test.sample(n=50)
     print(f'sample shape : {sample.shape}')
+    vsl_nota = []
+    msl_nota = []
+    vsl_comp = []
+    msl_comp = []
     for id in sample.user_id.tolist():
         print(f'for user id : {id}')
         print(f'notation')
-        metric_model_anime(user_id=id,best_anime=5)
+        vsl, msl = metric_model_anime(user_id=id,best_anime=5)
+        vsl_nota.append(vsl)
+        msl_nota.append(msl)
         print(f'completed')
-        metric_model_anime(user_id=id,model = 'completed',best_anime=10)
+        vsl, msl = metric_model_anime(user_id=id,model = 'completed',best_anime=5)
+        vsl_comp.append(vsl)
+        msl_comp.append(msl)
+    vsl_nota_tot = 0
+    msl_nota_tot = 0
+    for i in range(len(vsl_nota)):
+        for j in range(len(vsl_nota[i])):
+            vsl_nota_tot +=j
+    for i in range(len(msl_nota)):
+        for j in range(len(msl_nota[i])):
+            msl_nota_tot +=j
+    vsl_comp_tot = 0
+    msl_comp_tot = 0
+    for i in range(len(vsl_comp)):
+        for j in range(len(vsl_nota[i])):
+            vsl_comp_tot +=j
+    for i in range(len(msl_nota)):
+        for j in range(len(msl_comp[i])):
+            msl_comp_tot +=j
+    print(f'score notation ;{vsl_nota_tot/msl_nota_tot}')
+    print(f'score completed ;{vsl_comp_tot/msl_comp_tot}')
