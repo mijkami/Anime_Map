@@ -44,7 +44,7 @@ BUCKET_NAME = 'wagon-data-664-gogunska-neumf-perceptron'
 # train data file location
 # /!\ here you need to decide if you are going to train using the provided and uploaded data/train_1k.csv sample file
 # or if you want to use the full dataset (you need need to upload it first of course)
-BUCKET_TRAIN_DATA_PATH = 'data/active_users_df.csv'
+BUCKET_TRAIN_DATA_PATH = 'data/anime_map_data_animelist_100plus_PG.csv'
 
 ##### Training  - - - - - - - - - - - - - - - - - - - - - -
 
@@ -53,7 +53,7 @@ BUCKET_TRAIN_DATA_PATH = 'data/active_users_df.csv'
 ##### Model - - - - - - - - - - - - - - - - - - - - - - - -
 
 # model folder name (will contain the folders for all trained model versions)
-MODEL_NAME = 'NeuMF_MLperceptron_full_data'
+MODEL_NAME = 'NeuMF_MLperceptron_5M_data'
 
 # model version folder name (where the trained model.joblib file will be stored)
 MODEL_VERSION = 'v1'
@@ -89,15 +89,17 @@ def df_optimized(df, verbose=True, **kwargs):
 
 
 def get_data():
+    print('start loading data')
     """method to get the training data (or a portion of it) from google cloud bucket"""
     #to run in cloud
-    df = pd.read_csv(f"gs://{BUCKET_NAME}/{BUCKET_TRAIN_DATA_PATH}")
+    df = pd.read_csv(f"gs://{BUCKET_NAME}/{BUCKET_TRAIN_DATA_PATH}",nrows=5000000)
     #to run locally - faster
     #df = pd.read_csv("data/processed_data/active_users_df.csv", nrows=5000000)
     norm_rating = df.rating/10
     df['rating'] = norm_rating
-    df_optimized(df)
-    print('optimized mem')
+    #df_optimized(df)
+    #print('optimized mem')
+    print('got_data')
     return df
 
 
@@ -129,9 +131,11 @@ def len_to_num(dataset):
 
 def split(dataset):
     train, test = train_test_split(dataset, test_size=0.2)
+    print('splitted data')
     return train,test
 
 def train_model(num_users,num_animes,train):
+    print('starting training')
     latent_dim = 10
     # Define inputs
     anime_input = Input(shape=[1],name='anime-input')
@@ -178,15 +182,15 @@ def train_model(num_users,num_animes,train):
     model.compile(Adam(learning_rate=0.1), loss='mse', metrics='mse')
     model.fit([train.user_id, train.anime_id],
               train.rating,
-              epochs=1,
+              epochs=2,
               validation_split=0.3,
-              verbose=0,
+              verbose=2,
               callbacks=[es])
     print("trained model")
     return model
 
 
-STORAGE_LOCATION = 'models/anime_map/NeuMF_MLperceptron_full_data_1batch'
+STORAGE_LOCATION = 'models/anime_map/NeuMF_MLperceptron_5M_cloud'
 
 
 def save_model(model):
@@ -197,16 +201,16 @@ def save_model(model):
     # print(
     #     f"uploaded NeuMF_MLperceptron_full_data_1batch to gcp cloud storage under \n => {STORAGE_LOCATION}"
     # )
-    tf.keras.models.save_model(model, 'NeuMF_MLperceptron_full_data_1batch.h5')
-    print("saved model NOT joblib locally")
+    tf.keras.models.save_model(model, 'NeuMF_MLperceptron_500k_cloud.h5')
+    print("saved model locally")
     upload_model_to_gcp()
-    print(f"uploaded neuMFmodel.h5 to gcp cloud storage under \n => {STORAGE_LOCATION}")
+    print(f"uploaded NeuMF_MLperceptron_5M_cloud.h5 to gcp cloud storage under \n => {STORAGE_LOCATION}")
 
 def upload_model_to_gcp():
     client = storage.Client()
     bucket = client.bucket(BUCKET_NAME)
     blob = bucket.blob(STORAGE_LOCATION)
-    blob.upload_from_filename('NeuMF_MLperceptron_full_data_1batch.h5')
+    blob.upload_from_filename('NeuMF_MLperceptron_5M_cloud.h5')
 
 
 if __name__ == '__main__':

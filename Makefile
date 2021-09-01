@@ -89,7 +89,7 @@ create_bucket:
 
 # path to the file to upload to GCP (the path to the file should be absolute or should match the directory where the make command is ran)
 # replace with your local path to the `train_1k.csv` and make sure to put the path between quotes
-LOCAL_PATH="/home/ka_wagon/code/mijka/anime_map/data/processed_data/active_users_df.csv"
+LOCAL_PATH="/home/ka_wagon/code/mijka/anime_map/data/processed_data/anime_map_data_animelist_100plus_PG.csv"
 
 # bucket directory in which to store the uploaded file (`data` is an arbitrary name that we choose to use)
 BUCKET_FOLDER=data
@@ -98,10 +98,10 @@ BUCKET_FOLDER=data
 BUCKET_FILE_NAME=$(shell basename ${LOCAL_PATH})
 
 upload_data:
-	# @gsutil cp data/processed_data/active_users_df.csv gs://wagon-ml-my-bucket-name/data/active_users_df.csv
+# # @gsutil cp data/processed_data/active_users_df.csv gs://wagon-ml-my-bucket-name/data/active_users_df.csv
+# @gsutil cp ${LOCAL_PATH} gs://${BUCKET_NAME}/${BUCKET_FOLDER}/${BUCKET_FILE_NAME}
+	# @gsutil cp data/processed_data/anime_map_data_animelist_100plus_PG.csv gs://wagon-ml-my-bucket-name/data/anime_map_data_animelist_100plus_PG.csv
 	@gsutil cp ${LOCAL_PATH} gs://${BUCKET_NAME}/${BUCKET_FOLDER}/${BUCKET_FILE_NAME}
-
-
 
 run_locally:
 	@python -m ${PACKAGE_NAME}.${FILENAME}

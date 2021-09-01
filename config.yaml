@@ -1,0 +1,9 @@
+trainingInput:
+  scaleTier: CUSTOM
+  # Configure a master worker with 4 K80 GPUs
+  #masterType: standard_gpu
+  masterType: n1-highmem-32
+  masterConfig:
+    acceleratorConfig:
+      count: 2
+      type: NVIDIA_TESLA_T4
