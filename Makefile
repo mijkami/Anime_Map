@@ -114,5 +114,6 @@ gcp_submit_training:
 	--module-name ${PACKAGE_NAME}.${FILENAME} \
 	--python-version=${PYTHON_VERSION} \
 	--runtime-version=${RUNTIME_VERSION} \
+	--config config.yaml \
 	--region ${REGION} \
 	--stream-logs
