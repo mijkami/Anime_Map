@@ -58,7 +58,7 @@ def pivot_matrix(df):
     return pivot_table
 
 def PCA_vector(pivot_df):
-    pca = PCA(n_components = 2000, svd_solver='full')
+    pca = PCA(n_components = 2500, svd_solver='full')
     pca.fit(pivot_df)
     print(pca.explained_variance_ratio_.sum())
     pca_array = pca.transform(pivot_df)

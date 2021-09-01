@@ -4,7 +4,7 @@ import numpy as np
 
 def get_data():
     #df_users = pd.read_csv(f'../data/Processed_data/active_users_df_100PlusRatings_partial.csv',nrows=100) # local
-    df_users = pd.read_csv(f'gs://wagon-data-664-le_mehaute/anime_map_data/rating_complete_100plus_PG.csv') #for google cloud
+    df_users = pd.read_csv('gs://wagon-data-664-le_mehaute/anime_map_data/rating_complete_100plus_PG.csv') #for google cloud
     return df_users
 
 def get_anime():
