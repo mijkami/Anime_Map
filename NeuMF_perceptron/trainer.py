@@ -26,7 +26,6 @@ from keras.layers import BatchNormalization
 import pickle
 from tensorflow.keras.callbacks import EarlyStopping
 
-
 ### GCP configuration - - - - - - - - - - - - - - - - - - -
 
 # /!\ you should fill these according to your account
@@ -53,7 +52,7 @@ BUCKET_TRAIN_DATA_PATH = 'data/anime_map_data_animelist_100plus_PG.csv'
 ##### Model - - - - - - - - - - - - - - - - - - - - - - - -
 
 # model folder name (will contain the folders for all trained model versions)
-MODEL_NAME = 'NeuMF_MLperceptron_5M_data'
+MODEL_NAME = 'NeuMF_MLperceptron_5M_cloud'
 
 # model version folder name (where the trained model.joblib file will be stored)
 MODEL_VERSION = 'v1'
@@ -63,6 +62,7 @@ MODEL_VERSION = 'v1'
 # not required here
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
 
 # Optimize memory for lighter dataset
 def df_optimized(df, verbose=True, **kwargs):
@@ -89,17 +89,16 @@ def df_optimized(df, verbose=True, **kwargs):
 
 
 def get_data():
-    print('start loading data')
     """method to get the training data (or a portion of it) from google cloud bucket"""
     #to run in cloud
-    df = pd.read_csv(f"gs://{BUCKET_NAME}/{BUCKET_TRAIN_DATA_PATH}",nrows=5000000)
+    df = pd.read_csv(f"gs://{BUCKET_NAME}/{BUCKET_TRAIN_DATA_PATH}",
+                     nrows=5000000)
     #to run locally - faster
     #df = pd.read_csv("data/processed_data/active_users_df.csv", nrows=5000000)
-    norm_rating = df.rating/10
+    norm_rating = df.rating / 10
     df['rating'] = norm_rating
-    #df_optimized(df)
-    #print('optimized mem')
-    print('got_data')
+    df_optimized(df)
+    print('optimized mem')
     return df
 
 
@@ -112,7 +111,8 @@ def id_transform(dataset):
             dataset.at[index, 'anime_id'] = id
             id += 1
         else:
-            dataset.at[index, 'anime_id'] = anime_id_to_new_id.get(row['anime_id'])
+            dataset.at[index,
+                       'anime_id'] = anime_id_to_new_id.get(row['anime_id'])
     user_id_to_new_id = dict()
     id = 1
     for index, row in dataset.iterrows():
@@ -121,38 +121,48 @@ def id_transform(dataset):
             dataset.at[index, 'user_id'] = id
             id += 1
         else:
-            dataset.at[index, 'user_id'] = user_id_to_new_id.get(row['user_id'])
+            dataset.at[index,
+                       'user_id'] = user_id_to_new_id.get(row['user_id'])
     return dataset
+
 
 def len_to_num(dataset):
     num_users = len(dataset.user_id.unique())
     num_animes = len(dataset.anime_id.unique())
-    return num_users,num_animes
+    return num_users, num_animes
+
 
 def split(dataset):
     train, test = train_test_split(dataset, test_size=0.2)
-    print('splitted data')
-    return train,test
+    return train, test
 
-def train_model(num_users,num_animes,train):
-    print('starting training')
+
+def train_model(num_users, num_animes, train):
     latent_dim = 10
     # Define inputs
-    anime_input = Input(shape=[1],name='anime-input')
+    anime_input = Input(shape=[1], name='anime-input')
     user_input = Input(shape=[1], name='user-input')
 
     # MLP Embeddings
-    anime_embedding_mlp = Embedding(num_animes + 1, latent_dim, name='anime-embedding-mlp')(anime_input)
+    anime_embedding_mlp = Embedding(num_animes + 1,
+                                    latent_dim,
+                                    name='anime-embedding-mlp')(anime_input)
     anime_vec_mlp = Flatten(name='flatten-anime-mlp')(anime_embedding_mlp)
 
-    user_embedding_mlp = Embedding(num_users + 1, latent_dim, name='user-embedding-mlp')(user_input)
+    user_embedding_mlp = Embedding(num_users + 1,
+                                   latent_dim,
+                                   name='user-embedding-mlp')(user_input)
     user_vec_mlp = Flatten(name='flatten-user-mlp')(user_embedding_mlp)
 
     # MF Embeddings
-    anime_embedding_mf = Embedding(num_animes + 1, latent_dim, name='anime-embedding-mf')(anime_input)
+    anime_embedding_mf = Embedding(num_animes + 1,
+                                   latent_dim,
+                                   name='anime-embedding-mf')(anime_input)
     anime_vec_mf = Flatten(name='flatten-anime-mf')(anime_embedding_mf)
 
-    user_embedding_mf = Embedding(num_users + 1, latent_dim, name='user-embedding-mf')(user_input)
+    user_embedding_mf = Embedding(num_users + 1,
+                                  latent_dim,
+                                  name='user-embedding-mf')(user_input)
     user_vec_mf = Flatten(name='flatten-user-mf')(user_embedding_mf)
 
     concat = concatenate([anime_vec_mlp, user_vec_mlp], axis=1, name='concat')
@@ -167,12 +177,12 @@ def train_model(num_users,num_animes,train):
     # Prediction from both layers
     pred_mlp = Dense(10, name='pred-mlp', activation='relu')(fc_2_dropout)
     pred_mf = dot([anime_vec_mf, user_vec_mf],
-                axes=1,
-                normalize=False,
-                name='pred-mf')
+                  axes=1,
+                  normalize=False,
+                  name='pred-mf')
     combine_mlp_mf = concatenate([pred_mf, pred_mlp],
-                                axis=1,
-                                name='combine-mlp-mf')
+                                 axis=1,
+                                 name='combine-mlp-mf')
 
     # Final prediction
     result = Dense(1, name='result', activation='relu')(combine_mlp_mf)
@@ -182,9 +192,9 @@ def train_model(num_users,num_animes,train):
     model.compile(Adam(learning_rate=0.1), loss='mse', metrics='mse')
     model.fit([train.user_id, train.anime_id],
               train.rating,
-              epochs=2,
+              epochs=1,
               validation_split=0.3,
-              verbose=2,
+              verbose=0,
               callbacks=[es])
     print("trained model")
     return model
@@ -201,10 +211,13 @@ def save_model(model):
     # print(
     #     f"uploaded NeuMF_MLperceptron_full_data_1batch to gcp cloud storage under \n => {STORAGE_LOCATION}"
     # )
-    tf.keras.models.save_model(model, 'NeuMF_MLperceptron_500k_cloud.h5')
-    print("saved model locally")
+    tf.keras.models.save_model(model, 'NeuMF_MLperceptron_5M_cloud.h5')
+    print("saved NeuMF_MLperceptron_5M_cloud locally")
     upload_model_to_gcp()
-    print(f"uploaded NeuMF_MLperceptron_5M_cloud.h5 to gcp cloud storage under \n => {STORAGE_LOCATION}")
+    print(
+        f"uploaded NeuMF_MLperceptron_5M_cloud.h5 to gcp cloud storage under \n => {STORAGE_LOCATION}"
+    )
+
 
 def upload_model_to_gcp():
     client = storage.Client()
@@ -218,9 +231,9 @@ if __name__ == '__main__':
     df = get_data()
     # preprocess data
     dataset = id_transform(df)
-    num_users,num_animes = len_to_num(dataset)
+    num_users, num_animes = len_to_num(dataset)
     # split
-    train,test = split(dataset)
+    train, test = split(dataset)
     # train model
-    model = train_model(num_users, num_animes,train)
+    model = train_model(num_users, num_animes, train)
     save_model(model)
