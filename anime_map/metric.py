@@ -167,17 +167,17 @@ if __name__ == '__main__':
     msl_nota_tot = 0
     for i in range(len(vsl_nota)):
         for j in range(len(vsl_nota[i])):
-            vsl_nota_tot +=j
+            vsl_nota_tot +=vsl_nota[i][j]
     for i in range(len(msl_nota)):
         for j in range(len(msl_nota[i])):
-            msl_nota_tot +=j
+            msl_nota_tot +=msl_nota[i][j]
     vsl_comp_tot = 0
     msl_comp_tot = 0
     for i in range(len(vsl_comp)):
-        for j in range(len(vsl_nota[i])):
-            vsl_comp_tot +=j
-    for i in range(len(msl_nota)):
+        for j in range(len(vsl_comp[i])):
+            vsl_comp_tot +=vsl_comp[i][j]
+    for i in range(len(msl_comp)):
         for j in range(len(msl_comp[i])):
-            msl_comp_tot +=j
-    print(f'score notation ;{vsl_nota_tot/msl_nota_tot}')
-    print(f'score completed ;{vsl_comp_tot/msl_comp_tot}')
+            msl_comp_tot +=msl_comp[i][j]
+    print(f'score notation :{vsl_nota_tot/msl_nota_tot}')
+    print(f'score completed :{vsl_comp_tot/msl_comp_tot}')
