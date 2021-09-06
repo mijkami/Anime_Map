@@ -1,4 +1,4 @@
-# Presentation
+# 1 - Presentation
 - [Github URL](https://github.com/mijkami/anime_map) 
 
 ## Description:
@@ -24,7 +24,7 @@ Anime recommendation system based on Machine-learning.
 - [Tanguy LE MEHAUTE](https://github.com/Tanguy-lm)
 - [Slìman ISSARANE](https://github.com/slimyocho)
 
-# Startup the project
+# 2 - Startup the project
 
 Clone the project:
 ```bash
@@ -41,7 +41,7 @@ mkdir raw_data
 ```
 
 
-# Install
+# 3 - Install
 
 Go to `https://github.com/{group}/anime_map` to see the project, manage issues,
 setup you ssh public key, ...
