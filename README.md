@@ -1,48 +1,33 @@
 # Data analysis
-- Document here the project: anime_map
-- Description: Project Description
-- Data Source:
+- [Github URL](https://github.com/mijkami/anime_map) 
+- Description: Anime recommendation system based on Machine-learning.
+- Data Source: [Anime Recommendation DB 2020](https://www.kaggle.com/hernan4444/anime-recommendation-database-2020)
 - Type of analysis:
+  - data cleaning
+  - modelisation:
+    - a supervised model (KNN)
+    - an unsupervised model (Deep learning / neural network)
+  - [an API](https://github.com/mijkami/AnimeMap_API) to serve the predictions from the calculated model
+  - [a website](https://github.com/mijkami/AnimeMap_front) to allow users to get prediction results from the API/model
 
 Please document the project the better you can.
 
 # Startup the project
 
-The initial setup.
-
-Create virtualenv and install the project:
+Clone the project:
 ```bash
-sudo apt-get install virtualenv python-pip python-dev
-deactivate; virtualenv ~/venv ; source ~/venv/bin/activate ;\
-    pip install pip -U; pip install -r requirements.txt
+mkdir ~/code/anime_map && cd "$_"
+git clone git@github.com:mijkami/anime_map.git
+cd anime_map
+
 ```
 
-Unittest test:
+Then add a raw_data directory (as it is not tracked by git):
 ```bash
-make clean install test
+mkdir raw_data
+
 ```
 
-Check for anime_map in gitlab.com/{group}.
-If your project is not set please add it:
-
-- Create a new project on `gitlab.com/{group}/anime_map`
-- Then populate it:
-
-```bash
-##   e.g. if group is "{group}" and project_name is "anime_map"
-git remote add origin git@github.com:{group}/anime_map.git
-git push -u origin master
-git push -u origin --tags
-```
-
-Functionnal test with a script:
-
-```bash
-cd
-mkdir tmp
-cd tmp
-anime_map-run
-```
 
 # Install
 
@@ -56,19 +41,25 @@ sudo apt-get install virtualenv python-pip python-dev
 deactivate; virtualenv -ppython3 ~/venv ; source ~/venv/bin/activate
 ```
 
-Clone the project and install it:
-
+Create a virtual env for the project:
 ```bash
-git clone git@github.com:{group}/anime_map.git
-cd anime_map
-pip install -r requirements.txt
-make clean install test                # install and test
+pyenv virtualenv anime_map
 ```
-Functionnal test with a script:
+
+Tell pyenv that we want to use this virtual env for our project:
+```bash
+cd ~/code/mijkami/anime_map/
+```
+
+And run:
+```bash
+pyenv local anime_map
+```
+
+
+
+Install requirements:
 
 ```bash
-cd
-mkdir tmp
-cd tmp
-anime_map-run
+make install_requirements
 ```
