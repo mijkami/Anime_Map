@@ -1,16 +1,28 @@
-# Data analysis
+# Presentation
 - [Github URL](https://github.com/mijkami/anime_map) 
-- Description: Anime recommendation system based on Machine-learning.
-- Data Source: [Anime Recommendation DB 2020](https://www.kaggle.com/hernan4444/anime-recommendation-database-2020)
-- Type of analysis:
-  - data cleaning
-  - modelisation:
-    - a supervised model (KNN)
-    - an unsupervised model (Deep learning / neural network)
-  - [an API](https://github.com/mijkami/AnimeMap_API) to serve the predictions from the calculated model
-  - [a website](https://github.com/mijkami/AnimeMap_front) to allow users to get prediction results from the API/model
 
-Please document the project the better you can.
+## Description:
+Anime recommendation system based on Machine-learning.
+- [Pre-project Pitch](https://drive.google.com/file/d/16TPscq40Zxtq5IIbCskSsdUqOD8KHVMa/view?usp=sharing)
+- [Demo Day Slides](https://drive.google.com/file/d/1B0S42_UyG_7E6p8-8Yxj9ELzTd9stJcW/view?usp=sharing)
+
+## Data Source
+[Anime Recommendation DB 2020](https://www.kaggle.com/hernan4444/anime-recommendation-database-2020)
+
+
+## Type of analysis
+- data cleaning
+- modelisation:
+  - a supervised model (KNN)
+  - an unsupervised model (Deep learning / neural network)
+- [an API](https://github.com/mijkami/AnimeMap_API) to serve the predictions from the calculated model
+- [a website](https://github.com/mijkami/AnimeMap_front) to allow users to get prediction results from the API/model
+
+## Project members
+- [GAILLOT Dimitri](https://github.com/mijkami)
+- [Karyna GOGUNSKA](https://github.com/karynagogunska)
+- [Tanguy LE MEHAUTE](https://github.com/Tanguy-lm)
+- [Slìman ISSARANE](https://github.com/slimyocho)
 
 # Startup the project
 
