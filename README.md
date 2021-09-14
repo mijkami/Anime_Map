@@ -5,6 +5,7 @@
 Anime recommendation system based on Machine-learning.
 - [Pre-project Pitch](https://drive.google.com/file/d/16TPscq40Zxtq5IIbCskSsdUqOD8KHVMa/view?usp=sharing)
 - [Demo Day Slides](https://drive.google.com/file/d/1B0S42_UyG_7E6p8-8Yxj9ELzTd9stJcW/view?usp=sharing)
+- [PoC website](https://anime-map-front.herokuapp.com/)
 
 ## Data Source
 [Anime Recommendation DB 2020](https://www.kaggle.com/hernan4444/anime-recommendation-database-2020)
